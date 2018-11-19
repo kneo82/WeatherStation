@@ -13,7 +13,8 @@ C_SRCS += \
 ../Src/stm32f4xx_hal_timebase_TIM.c \
 ../Src/stm32f4xx_it.c \
 ../Src/system_stm32f4xx.c \
-../Src/usart.c 
+../Src/usart.c \
+../Src/weatherForecast.c 
 
 OBJS += \
 ./Src/dma.o \
@@ -25,7 +26,8 @@ OBJS += \
 ./Src/stm32f4xx_hal_timebase_TIM.o \
 ./Src/stm32f4xx_it.o \
 ./Src/system_stm32f4xx.o \
-./Src/usart.o 
+./Src/usart.o \
+./Src/weatherForecast.o 
 
 C_DEPS += \
 ./Src/dma.d \
@@ -37,7 +39,8 @@ C_DEPS += \
 ./Src/stm32f4xx_hal_timebase_TIM.d \
 ./Src/stm32f4xx_it.d \
 ./Src/system_stm32f4xx.d \
-./Src/usart.d 
+./Src/usart.d \
+./Src/weatherForecast.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

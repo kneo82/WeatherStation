@@ -56,7 +56,8 @@ Src/freertos.o: ../Src/freertos.c \
  /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Drivers/ringbuffer_dma/ringbuffer_dma.h \
  /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Drivers/ATParser/at_parser.h \
  /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Drivers/ATParser/my_string.h \
- /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Drivers/ATParser/types.h
+ /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Drivers/ATParser/types.h \
+ /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Inc/weatherForecast.h
 
 /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 
@@ -173,3 +174,5 @@ Src/freertos.o: ../Src/freertos.c \
 /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Drivers/ATParser/my_string.h:
 
 /Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Drivers/ATParser/types.h:
+
+/Users/vitaliyvoronok/Documents/TechMaker/WeatherStation_001/Inc/weatherForecast.h:

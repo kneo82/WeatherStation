@@ -65,6 +65,7 @@
 #include "ringbuffer_dma.h"
 #include <string.h>
 #include "at_parser.h"
+#include "weatherForecast.h"
 
 /* USER CODE END Includes */
 
@@ -97,21 +98,19 @@ osMutexId weatherMutexHandle;
 
 osMailQId mailWeatherHandle;
 
-typedef enum {
-	normal,
-} WeatherType;
-
 /* Data structure for weather */
 typedef struct {
 	double temp;
 	double press;
-	WeatherType weatherPredict;
+	char weatherPredict[100];
 } Weather;
 
 Weather currentWeather = {0};
 int8_t com_rslt;
 
 RingBuffer_DMA rx_buf;
+
+#define QNH 1020
 
 #define BUF_SIZE 256
 uint8_t rx[BUF_SIZE];
@@ -120,7 +119,7 @@ uint32_t rx_count = 0;
 char cmd[128];
 uint8_t icmd = 0;
 
-uint8_t tx[100];
+uint8_t tx[150];
 uint32_t lastTick = 0;
 
 uint8_t isTransferWether = 0;
@@ -138,6 +137,15 @@ char execStopTransferWeather(char *value);
 char setTransferInterval(char *value);
 char getTransferInterval(char *value);
 char testTransferInterval(char *value);
+
+double savePress[24] = {0};
+uint8_t savePressSize = 24;
+
+void savePressValue(double press);
+float seaLevelPressure(double press, double altitude, double temp);
+
+uint32_t hourInterval = 1000 * 60 * 60;
+uint32_t lastPressTick = 0;
 
 /* USER CODE END FunctionPrototypes */
 
@@ -281,7 +289,7 @@ void StartUpdateDisplay(void const * argument)
 			LCD_SetCursor(0, 0);
 			LCD_Printf("Temp : %6.2f C       \n", weatherData->temp);
 			LCD_Printf("Press: %6.2f kPa\n", weatherData->press);
-			LCD_Printf("Weather Predict  : %s", "Normal");
+			LCD_Printf("Weather Predict  : %s                              \n", weatherData->weatherPredict);
 
 			/* Free the cell in mail queue */
 			osMailFree(mailWeatherHandle, weatherData);
@@ -325,12 +333,23 @@ void StartReadSensor(void const * argument)
 	{
 		BMP280_read_temperature_double(&temp);
 		BMP280_read_pressure_double(&press);
+		double alt = BMP280_calculate_altitude(QNH * 100);
 
 		weatherData = (Weather *) osMailAlloc(mailWeatherHandle, 5);
+
+		if (HAL_GetTick() - lastPressTick > hourInterval) {
+			double seaLevelPress = seaLevelPressure(press / 100, alt, temp);
+			savePressValue(seaLevelPress);
+			lastPressTick = HAL_GetTick();
+		}
+
+		double trend = savePress[23] - savePress[20];
+		char *predict = calcZambretti(seaLevelPressure(press / 100, alt, temp), trend, 11);
 
 		if (weatherData !=NULL) {
 			weatherData->press = press / 1000.0;
 			weatherData->temp = temp;
+			strcpy(weatherData->weatherPredict, predict);
 			osMailPut(mailWeatherHandle, weatherData);
 		}
 
@@ -338,6 +357,7 @@ void StartReadSensor(void const * argument)
 		if (status == osOK) {
 			currentWeather.press = press;
 			currentWeather.temp = temp;
+			strcpy(currentWeather.weatherPredict, predict);
 			osMutexRelease(weatherMutexHandle);
 		}
 
@@ -368,7 +388,7 @@ char getPress(char *value) {
 		return AT_ERROR;
 	}
 
-	char result[100] = {0};
+	char result[150] = {0};
 	sprintf(result, "Press: %.2f\r\n", wData.press);
 
 	strcpy(value, result);
@@ -381,8 +401,8 @@ char getPrediction(char *value) {
 		return AT_ERROR;
 	}
 
-	char result[100] = {0};
-	sprintf(result, "Prediction: %s\r\n", "Normal");
+	char result[150] = {0};
+	sprintf(result, "Prediction: %s\r\n", wData.weatherPredict);
 
 	strcpy(value, result);
 	return AT_OK;
@@ -394,8 +414,8 @@ char getWeather(char *value) {
 		return AT_ERROR;
 	}
 
-	char result[100] = {0};
-	sprintf(result, "Temp: %.2f, Press: %.2f, Prediction: %s\r\n", wData.temp, wData.press, "Normal");
+	char result[150] = {0};
+	sprintf(result, "Temp: %.2f, Press: %.2f, Prediction: %s\r\n", wData.temp, wData.press, wData.weatherPredict);
 
 	strcpy(value, result);
 	return AT_OK;
@@ -443,7 +463,7 @@ Weather weatherData(void) {
 	if (status == osOK) {
 		result.temp = currentWeather.temp;
 		result.press = currentWeather.temp;
-		result.weatherPredict = currentWeather.weatherPredict;
+		strcpy(result.weatherPredict, currentWeather.weatherPredict);
 		osMutexRelease(weatherMutexHandle);
 	}
 
@@ -451,11 +471,11 @@ Weather weatherData(void) {
 }
 
 uint8_t isEmptyWeatherStruct(Weather wData) {
-	return 0 == wData.temp && 0 == wData.press && 0 == wData.weatherPredict;
+	return 0 == wData.temp && 0 == wData.press && strlen(wData.weatherPredict) == 0;
 }
 
 void Process_Command(char * command) {
-	char result[100] = {0};
+	char result[150] = {0};
 	char ret = at_parse_line(command, result);
 
 	if (AT_OK == ret) {
@@ -469,6 +489,18 @@ void Process_Command(char * command) {
 	}
 
 	HAL_UART_Transmit(&huart4, tx, strlen((char *) tx), 100);
+}
+
+void savePressValue(double press) {
+	for (uint8_t i = 1; i < savePressSize; i++) {
+		savePress[i-1] = savePress[i];
+	}
+
+	savePress[savePressSize - 1] = press;
+}
+
+float seaLevelPressure(double press, double altitude, double temp) {
+  return press * pow(1 - 0.0065 * altitude / (temp + 0.0065 * altitude + 273.15), -5.275);
 }
 
 /* USER CODE END Application */
