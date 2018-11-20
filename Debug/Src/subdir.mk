@@ -4,41 +4,50 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Src/commandTask.c \
 ../Src/dma.c \
 ../Src/freertos.c \
 ../Src/gpio.c \
 ../Src/i2c.c \
 ../Src/main.c \
+../Src/readSensors.c \
 ../Src/stm32f4xx_hal_msp.c \
 ../Src/stm32f4xx_hal_timebase_TIM.c \
 ../Src/stm32f4xx_it.c \
 ../Src/system_stm32f4xx.c \
+../Src/updateDisplay.c \
 ../Src/usart.c \
 ../Src/weatherForecast.c 
 
 OBJS += \
+./Src/commandTask.o \
 ./Src/dma.o \
 ./Src/freertos.o \
 ./Src/gpio.o \
 ./Src/i2c.o \
 ./Src/main.o \
+./Src/readSensors.o \
 ./Src/stm32f4xx_hal_msp.o \
 ./Src/stm32f4xx_hal_timebase_TIM.o \
 ./Src/stm32f4xx_it.o \
 ./Src/system_stm32f4xx.o \
+./Src/updateDisplay.o \
 ./Src/usart.o \
 ./Src/weatherForecast.o 
 
 C_DEPS += \
+./Src/commandTask.d \
 ./Src/dma.d \
 ./Src/freertos.d \
 ./Src/gpio.d \
 ./Src/i2c.d \
 ./Src/main.d \
+./Src/readSensors.d \
 ./Src/stm32f4xx_hal_msp.d \
 ./Src/stm32f4xx_hal_timebase_TIM.d \
 ./Src/stm32f4xx_it.d \
 ./Src/system_stm32f4xx.d \
+./Src/updateDisplay.d \
 ./Src/usart.d \
 ./Src/weatherForecast.d 
 
