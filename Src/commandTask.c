@@ -144,7 +144,7 @@ char getWeather(char *value) {
 	}
 
 	char result[150] = {0};
-	sprintf(result, "Temp: %.2f, Press: %.2f, Prediction: %s\r\n", wData.temp, wData.press, wData.weatherPredict);
+	sprintf(result, "Temp: %.2f; Press: %.2f; Prediction: %s\r\n", wData.temp, wData.press, wData.weatherPredict);
 
 	strcpy(value, result);
 	return AT_OK;
@@ -191,7 +191,7 @@ Weather weatherData(void) {
 
 	if (status == osOK) {
 		result.temp = currentWeather.temp;
-		result.press = currentWeather.temp;
+		result.press = currentWeather.press;
 		strcpy(result.weatherPredict, currentWeather.weatherPredict);
 		osMutexRelease(weatherMutexHandle);
 	}

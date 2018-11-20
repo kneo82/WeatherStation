@@ -85,7 +85,7 @@ void StartReadSensor(void const * argument)
 
 		status = osMutexWait(weatherMutexHandle, 20);
 		if (status == osOK) {
-			currentWeather.press = press;
+			currentWeather.press = press / 1000.0;
 			currentWeather.temp = temp;
 			strcpy(currentWeather.weatherPredict, predict);
 			osMutexRelease(weatherMutexHandle);
